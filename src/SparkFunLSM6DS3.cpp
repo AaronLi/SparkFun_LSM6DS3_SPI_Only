@@ -27,7 +27,7 @@ Distributed as-is; no warranty is given.
 
 //See SparkFunLSM6DS3.h for additional topology notes.
 
-#include "SparkFunLSM6DS3.h"
+#include "SparkFunLSM6DS3_SPI.h"
 
 //****************************************************************************//
 //
@@ -65,11 +65,6 @@ status_t LSM6DS3Core::beginCore(void)
   uint32_t spiPortSpeed = 5000000;
 
 	switch (commInterface) {
-
-	case I2C_MODE:
-		Wire.begin();
-		break;
-
 	case SPI_MODE:
 		// start the SPI library:
 		SPI.begin();
@@ -138,28 +133,6 @@ status_t LSM6DS3Core::readRegisterRegion(uint8_t *outputPointer , uint8_t offset
 	uint8_t tempFFCounter = 0;
 
 	switch (commInterface) {
-
-	case I2C_MODE:
-		Wire.beginTransmission(I2CAddress);
-		Wire.write(offset);
-		if( Wire.endTransmission() != 0 )
-		{
-			returnError = IMU_HW_ERROR;
-		}
-		else  //OK, all worked, keep going
-		{
-			// request 6 bytes from slave device
-			Wire.requestFrom(I2CAddress, length);
-			while ( (Wire.available()) && (i < length))  // slave may send less than requested
-			{
-				c = Wire.read(); // receive a byte as character
-				*outputPointer = c;
-				outputPointer++;
-				i++;
-			}
-		}
-		break;
-
 	case SPI_MODE:
 		// take the chip select low to select the device:
 		digitalWrite(chipSelectPin, LOW);
@@ -209,21 +182,6 @@ status_t LSM6DS3Core::readRegister(uint8_t* outputPointer, uint8_t offset) {
 	status_t returnError = IMU_SUCCESS;
 
 	switch (commInterface) {
-
-	case I2C_MODE:
-		Wire.beginTransmission(I2CAddress);
-		Wire.write(offset);
-		if( Wire.endTransmission() != 0 )
-		{
-			returnError = IMU_HW_ERROR;
-		}
-		Wire.requestFrom(I2CAddress, numBytes);
-		while ( Wire.available() ) // slave may send less than requested
-		{
-			result = Wire.read(); // receive a byte as a proper uint8_t
-		}
-		break;
-
 	case SPI_MODE:
 		// take the chip select low to select the device:
 		digitalWrite(chipSelectPin, LOW);
@@ -280,17 +238,6 @@ status_t LSM6DS3Core::readRegisterInt16( int16_t* outputPointer, uint8_t offset 
 status_t LSM6DS3Core::writeRegister(uint8_t offset, uint8_t dataToWrite) {
 	status_t returnError = IMU_SUCCESS;
 	switch (commInterface) {
-	case I2C_MODE:
-		//Write the byte
-		Wire.beginTransmission(I2CAddress);
-		Wire.write(offset);
-		Wire.write(dataToWrite);
-		if( Wire.endTransmission() != 0 )
-		{
-			returnError = IMU_HW_ERROR;
-		}
-		break;
-
 	case SPI_MODE:
 		// take the chip select low to select the device:
     SPI.beginTransaction(mySpiSettings);

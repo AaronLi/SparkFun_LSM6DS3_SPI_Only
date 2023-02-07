@@ -28,7 +28,6 @@ Distributed as-is; no warranty is given.
 #define __LSM6DS3IMU_H__
 
 #include "Arduino.h"
-#include "Wire.h"
 #include "SPI.h"
 
 #define I2C_MODE 0
